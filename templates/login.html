@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {{message}}
-    <form action="../login/" method="post">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+    <h1>Inloggen</h1>
+    <form action={% url 'login' %} method="post">
         {% csrf_token %}
         Username:
-        <input type="text" name="username" id="username">
-        Password
-        <input type="password" name="password" id="password">
+        <input type="text" name="username" id="username"> <br>
+        Password:
+        <input type="password" name="password" id="password"> <br>
         <button type="submit">Inloggen</button>
-
     </form>
-
+    <p>Als je nog geen account hebt kan je deze hier <a href={% url 'register' %}>aanmaken</a></p>
 {% endblock content %}
 
 

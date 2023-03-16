@@ -81,8 +81,34 @@ body {
     background-color: black;
   }
   
-  
+  /* Custom error styling  */
+  .info {
+    display: inline-block;
+    background-color: #9af0ff;
+    padding: 1%;
+    border-style: solid;
+  }
 
+  .warning {
+    display: inline-block;
+    background-color: #fff89a;
+    padding: 1%;
+    border-style: solid;
+  }
+
+  .error {
+    display: inline-block;
+    background-color: #ff9a9a;
+    padding: 1%;
+    border-style: solid;
+  }
+
+  .success {
+    display: inline-block;
+    background-color: #a6ff9a;
+    padding: 1%;
+    border-style: solid;
+  }
 
 
 
