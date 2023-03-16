@@ -17,7 +17,12 @@ from django.contrib import admin
 from django.urls import path
 from BarApp import views
 
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',views.index),
+    path('admin/', admin.site.urls,name="admin"),
+    path('',views.index,name="home"),
+    path('register/',views.register,name="register"),
+    path('login/',views.v_login,name="login"),
+    path('logout/',views.v_logout,name="logout"),
+    path('add_saldo/',views.add_saldo,name="add_saldo"),
 ]
