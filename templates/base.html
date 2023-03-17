@@ -7,6 +7,9 @@
     <script src="https://kit.fontawesome.com/446b75a6ee.js" crossorigin="anonymous"></script>
     {% load static %}
     <link rel="stylesheet" type="text/css" href={% static 'css/style.css' %}>
+    <link rel="stylesheet" type="text/css" href={% static 'css/bootstrap.css' %}>
+
+
     {% block title %}<title>SSL barpagina</title>{% endblock title %}
 </head>
 <body>
@@ -49,6 +52,19 @@
         </div>
         {% endblock navbar %}
         <div class="content">
+
+            {% block messages %}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                        <div role="alert" {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endblock messages %}
+
             {% block content %}
             Temp content
             {% endblock content %}

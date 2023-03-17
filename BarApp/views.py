@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 # Create your views here.
 
 def index(request):
-    print(request.user.is_authenticated)
     if request.user.is_authenticated:
         return render(request,"index.html")
     else: 
@@ -46,10 +45,8 @@ def v_login(request):
 
 def v_logout(request):
     logout(request)
-    logmsg="Je bent sucessvol uitgelogt!"
-    return render(request,"logout.html",{
-        "logoutmsg": logmsg
-    })
+    messages.success(request,"Je bent nu uitgelogt!")
+    return redirect(index)
     
 def add_saldo(request):
     return render(request,"add_saldo.html")
