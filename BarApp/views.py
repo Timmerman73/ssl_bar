@@ -3,8 +3,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages 
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
+from BarApp.models import Saldo,Stortingen,Drankjes,Transacties
 # Create your views here.
 
+    
 def index(request):
     if request.user.is_authenticated:
         return render(request,"index.html")
@@ -26,6 +28,10 @@ def register(request):
             messages.warning(request,"Wachtwoorden komen niet overeen")
         else:
             user = User.objects.create_user(username=username,password=password1)
+            logout(request)
+            login(request,user)
+            saldo_entry = Saldo(user=user,username=username,saldo=0)
+            saldo_entry.save()
             messages.success(request,f"Account met username: {username} sucessvol aangemaakt")    
     return render (request=request, template_name="register.html") 
 

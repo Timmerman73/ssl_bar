@@ -19,10 +19,12 @@ from BarApp import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls,name="admin"),
     path('',views.index,name="home"),
+    path('admin/', admin.site.urls,name="admin"),
     path('register/',views.register,name="register"),
     path('login/',views.v_login,name="login"),
     path('logout/',views.v_logout,name="logout"),
     path('add_saldo/',views.add_saldo,name="add_saldo"),
+    path('stats/',views.index,name="stats"),
+    path('baradmin/',views.index,name="baradmin"),
 ]

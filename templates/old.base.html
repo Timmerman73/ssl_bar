@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/446b75a6ee.js" crossorigin="anonymous"></script>
+    {% load static %}
+    {% comment %} <link rel="stylesheet" type="text/css" href={% static 'css/style.css' %}> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href={% static 'css/bootstrap.css' %}>
+
+
+    {% block title %}<title>SSL barpagina</title>{% endblock title %}
+</head>
+<body>
+    {% block navbar %}
+    <div class="mainpage_wrapper">
+        <div class="navbar">
+            <div class="imgbox">
+                <a href="/"><img src={% static 'img/bar.webp' %}  id="barimg"></a>
+            </div>
+            <div class="linkfield">
+                <div class="navbtn">
+                    <a href={%url 'home' %}>Home</a>
+                    <a href="/baradmin/">Bar administratie</a>
+                    <a href="/stats/">Statestieken</a>
+                    {% comment %} 
+                    Required buttons 
+                    homepage If login dan drankjes laten zien anders 
+                    in laten loggen
+                    Saldo toevoegen
+                    Logs / Statistics Dropdown ?!?
+                    Bar admin
+                    User login
+                     {% endcomment %}
+                     
+                </div>
+            </div>
+            <img src={% static 'img/user.png' %} id="userimg">
+            <div class="navLOGIN">
+                <div class="welcome">
+                    <br>
+                    Welkom, {{user}} <br>
+                    <b>Saldo:</b> {{saldo}}€
+                </div>
+                <div>
+                    <a title="login" href={% url 'login' %}><i class="fa-solid fa-arrow-right-to-bracket"></i></a>
+                    <a title="Saldo Toevoegen" href={% url 'add_saldo' %}><i class="fa-solid fa-euro-sign"></i></a>
+                    <a title="logout" href={% url 'logout' %}><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                </div>
+            </div>
+        </div>
+        {% endblock navbar %}
+        <div class="content">
+
+            {% block messages %}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                        <div role="alert" {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endblock messages %}
+
+            {% block content %}
+            Temp content
+            {% endblock content %}
+        </div>
+    </div>
+</body>
+</html>

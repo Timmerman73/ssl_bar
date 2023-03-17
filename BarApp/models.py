@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 class Saldo(models.Model):
     user = models.OneToOneField(get_user_model(),primary_key=True,on_delete=models.CASCADE)
+    # username = models.ForeignKey(get_user_model().username,on_delete=models.CASCADE)
     saldo = models.DecimalField(max_digits=5, decimal_places=2)
     class Meta:
         db_table = 'Saldo'

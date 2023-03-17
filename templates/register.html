@@ -1,20 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}  
-<div class = "login">  
-    
-        <h1>Account aanmaken</h1>
-        <form action={% url 'register' %} method="post">
+
+<div class="container border m-4">
+    <h1>Account aanmaken</h1>
+        <form class="p-4" action={% url 'register' %} method="post">
             {% csrf_token %}
-            Gebruikersnaam:
-            <input type="text" name="username" id="username"> <br>
-            Wachtwoord:
-            <input type="password" name="password1" id="password1"> <br>
-            Wachtwoord Herhalen:
-            <input type="password" name="password2" id="password2"> <br>
-            <button type="submit">Account aanmaken</button>
+            <label for="username" class="form-label">Gebruikersnaam</label>
+            <input class="form-control" type="text" name="username" id="username"> <br>
+
+            <label for="password1" class="form-label">Wachtwoord (Minimaal 4 tekens)</label>
+            <input class="form-control" type="password" name="password1" id="password1"> <br>
+
+            <label for="password2" class="form-label">Wachtwoord herhalen</label>
+            <input class="form-control" type="password" name="password2" id="password2"> <br>
+
+            <button class="btn btn-primary" type="submit">Account aanmaken</button>
+            <a class="btn btn-primary" href={% url 'login' %}>Ik wil Inloggen</a>
         </form>
-        <p>Als je al een account heb kan je hier <a href={% url 'login' %}>inloggen</a></p>
-     </div>  
-  
+</div>
+
 {% endblock content %}  
