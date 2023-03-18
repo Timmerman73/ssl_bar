@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}  
+
+<!-- Button trigger modal -->
+
+<div class="container border m-4 p-4">
+    
+    <h1>Saldo Storten!</h1>
+    <form class="p-2" action={% url 'add_saldo' %} method="post">
+        {% csrf_token %}
+        {{form.amount.label_tag}} <br>
+        {{form.amount}} <br>
+        {{form.user.label_tag}} <br>
+        {{form.user}} <br>
+    
+      <!-- Modal -->
+      <div class="modal fade" id="saveChanges" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="save_changes">Saldo Bijladen</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {{user}} wil je dit bedrag bijladen?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+              <button type="submit" class="btn btn-primary">Saldo Toevoegen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveChanges">
+        Saldo Toevoegen!
+      </button>
+  </div>
+
+{% endblock content %}  

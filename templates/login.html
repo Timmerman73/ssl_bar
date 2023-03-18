@@ -3,7 +3,8 @@
 {% block content %}
  
 <div class="container border m-4">
-    <h1>Inloggen</h1>
+    <h1>Inloggen</h1> <br>
+    Om deze website te gebruiken moet je inloggen! Daarom ben je waarschijnlijk naar deze pagina gestuurd!
         <form class="p-4" action={% url 'login' %} method="post">
             {% csrf_token %}
             <label for="username" class="form-label">Gebruikersnaam</label>
