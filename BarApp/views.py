@@ -7,6 +7,9 @@ from BarApp.models import Saldo,Stortingen,Drankjes,Transacties
 from django import forms
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+import pandas as pd
+import locale
+locale.setlocale(locale.LC_ALL,"nl-nl")
 
 # Create your views here.
 
@@ -64,26 +67,42 @@ class AddMoney(forms.Form):
 def add_saldo(request):
     if request.method == "POST":
         amount = float(request.POST.get("amount"))
-        user = User.objects.get(id=request.POST.get("user"))
-        executed_by = request.user
-        saldo = Saldo.objects.get(user=user)
-        old_saldo = float(saldo.saldo)
-        new_saldo = float(saldo.saldo) + amount
-        storting = Stortingen(
-            user=user,
-            done_by=executed_by,
-            amount=amount,
-            saldo_voor=old_saldo,
-            saldo_na=new_saldo,
-            dateTime=datetime.now())
-        
-        saldo.saldo = new_saldo
-        saldo.save()
-        storting.save()
-
-    
+        if amount != 0:
+            user = User.objects.get(id=request.POST.get("user"))
+            executed_by = request.user
+            saldo = Saldo.objects.get(user=user)
+            old_saldo = float(saldo.saldo)
+            new_saldo = float(saldo.saldo) + amount
+            storting = Stortingen(
+                user=user,
+                done_by=executed_by,
+                amount=amount,
+                saldo_voor=old_saldo,
+                saldo_na=new_saldo,
+                dateTime=datetime.now().replace(microsecond=0))
+            
+            saldo.saldo = new_saldo
+            saldo.save()
+            storting.save()
+    df = pd.DataFrame(list(Stortingen.objects.all().values("dateTime","user_id","saldo_voor","amount","saldo_na","done_by_id")))
+    df = df.sort_values(by="dateTime",ascending=False)
+    df["user_id"] = [User.objects.get(id=i) for i in df["user_id"]]
+    df["done_by_id"] = [User.objects.get(id=i) for i in df["done_by_id"]]
+    df['dateTime'] = [i.strftime("%A %d-%B %X") for i in df["dateTime"]]
+    df = df.rename(columns={
+        "dateTime":"Datum & Tijd",
+        "user_id":"Saldo van",
+        "saldo_voor":"Saldo voor",
+        "amount":"Bedrag",
+        "saldo_na":"Saldo na",
+        "done_by_id":"Uitgevoerd door"
+               })
+    html_table = df.to_html(classes="table table-striped table-bordered",index=False,max_rows=25)
     
     money_form = AddMoney(initial= {'amount': 0.00,
                                     'user': request.user})
     
-    return render(request,"add_saldo.html",{"form": money_form })
+    return render(request,"add_saldo.html",{
+        "form": money_form,
+        "table": html_table
+                                            })

@@ -6,15 +6,19 @@
     <h1>Account aanmaken</h1>
         <form class="p-4" action={% url 'register' %} method="post">
             {% csrf_token %}
-            <label for="username" class="form-label">Gebruikersnaam</label>
-            <input class="form-control" type="text" name="username" id="username"> <br>
+            <div class="form-floating">
+                <input class="form-control" type="text" name="username" id="username"> <br>
+                <label for="username" class="form-label">Gebruikersnaam</label>
+            </div>
+            <div class="form-floating">
 
-            <label for="password1" class="form-label">Wachtwoord (Minimaal 4 tekens)</label>
-            <input class="form-control" type="password" name="password1" id="password1"> <br>
-
-            <label for="password2" class="form-label">Wachtwoord herhalen</label>
+                <input class="form-control" type="password" name="password1" id="password1"> <br>
+                <label for="password1" class="form-label">Wachtwoord (Minimaal 4 tekens)</label>
+            </div>
+        <div class="form-floating">
             <input class="form-control" type="password" name="password2" id="password2"> <br>
-
+            <label for="password2" class="form-label">Wachtwoord herhalen</label>
+        </div>
             <button class="btn btn-primary" type="submit">Account aanmaken</button>
             <a class="btn btn-primary" href={% url 'login' %}>Ik wil Inloggen</a>
         </form>

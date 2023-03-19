@@ -7,10 +7,14 @@
     Om deze website te gebruiken moet je inloggen! Daarom ben je waarschijnlijk naar deze pagina gestuurd!
         <form class="p-4" action={% url 'login' %} method="post">
             {% csrf_token %}
-            <label for="username" class="form-label">Gebruikersnaam</label>
-            <input class="form-control" type="text" name="username" id="username"> <br>
-            <label for="password" class="form-label">Wachtwoord</label>
-            <input class="form-control" type="password" name="password" id="password"> <br>
+            <div class="form-floating">
+                <input class="form-control" type="text" name="username" id="username"> <br>
+                <label for="username">Gebruikersnaam</label>
+            </div>
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password"> <br>
+                <label for="password">Wachtwoord</label>
+            </div>
             <button class="btn btn-primary" type="submit">Inloggen</button>
             <a class="btn btn-primary" href={% url 'register' %}>Account aanmaken</a>
         </form>

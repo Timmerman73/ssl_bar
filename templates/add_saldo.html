@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
-{% block content %}  
+{% block head %}
+{% load static %}
+<script src="{% static 'js/add_saldo.js' %}"></script>
+{% endblock head %}
 
+{% block content %}  
 <!-- Button trigger modal -->
 
 <div class="container border m-4 p-4">
@@ -23,19 +27,33 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              {{user}} wil je dit bedrag bijladen?
+              <b id="usrname">Beste {{user}},</b> <p id="conftext"> Dit hoor je niet te zien! </p>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-              <button type="submit" class="btn btn-primary">Saldo Toevoegen</button>
+              <button type="submit" class="btn btn-primary">Bevestig!</button>
             </div>
           </div>
         </div>
       </div>
       </form>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveChanges">
+      <button type="button" class="btn btn-primary" onclick="saldo_parse()" data-bs-toggle="modal" data-bs-target="#saveChanges">
         Saldo Toevoegen!
       </button>
-  </div>
 
+    </div>
+
+    <div class="container border m-4 p-4">
+      <p>
+        <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+          Logboek
+        </a>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <div class="table-responsive">
+          {{table | safe}}
+        </div>
+      </div>
+  </div>
+    
 {% endblock content %}  
