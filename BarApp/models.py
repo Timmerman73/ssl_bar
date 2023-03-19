@@ -8,6 +8,7 @@ class Saldo(models.Model):
     saldo = models.DecimalField(max_digits=5, decimal_places=2)
     class Meta:
         db_table = 'Saldo'
+        verbose_name_plural = "Saldo's"
         
 class Stortingen(models.Model):
     storting_id = models.AutoField(primary_key=True)
@@ -20,6 +21,7 @@ class Stortingen(models.Model):
     
     class Meta:
         db_table = 'Stortingen'
+        verbose_name_plural = "Stortingen"
 
 class Drankjes(models.Model):
     drankjes_id = models.AutoField(primary_key=True)
@@ -27,6 +29,7 @@ class Drankjes(models.Model):
     prijs = models.DecimalField(max_digits=5,decimal_places=2)
     class Meta:
         db_table = 'Drankjes'
+        verbose_name_plural = "Drankjes"
     
 
 class Transacties(models.Model):
@@ -37,5 +40,19 @@ class Transacties(models.Model):
     
     class Meta:
         db_table = 'Transacties'
+        verbose_name_plural = "Transacties"
+        
+class Tikkie(models.Model):
+    id = models.AutoField(primary_key=True)
+    link = models.CharField(max_length=128)
+    user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table = 'Tikkies'
+        verbose_name_plural = "Tikkies"
+        
+    def __str__(self):
+        return self.link
+    
     
     

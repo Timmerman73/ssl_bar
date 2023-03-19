@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages 
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
-from BarApp.models import Saldo,Stortingen,Drankjes,Transacties
+from BarApp.models import Saldo,Stortingen,Drankjes,Transacties,Tikkie
 from django import forms
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
@@ -57,6 +57,7 @@ def v_logout(request):
     messages.success(request,"Je bent nu uitgelogt!")
     return redirect(index)
 
+
 class AddMoney(forms.Form):
     amount = forms.DecimalField(label="Hoeveel geld wil je storten:",max_digits=5, decimal_places=2)
     user = forms.ModelChoiceField(label="Bij wie moet dit op de rekening:",queryset=User.objects.filter(id__in=Saldo.objects.values_list('user_id',flat=True)))
@@ -102,7 +103,23 @@ def add_saldo(request):
     money_form = AddMoney(initial= {'amount': 0.00,
                                     'user': request.user})
     
+    if Tikkie.objects.exists():
+        tikkie = Tikkie.objects.latest("link")
+    else:
+        tikkie = "Nog geen link in database Voeg er een toe!"
+    
     return render(request,"add_saldo.html",{
+        "tikkie": tikkie,
         "form": money_form,
         "table": html_table
                                             })
+    
+    
+def tikkie_change(request):
+    print("CALL")
+    if request.method == "POST":
+        link = request.POST.get("link")
+        t = Tikkie(link=link,user=request.user)
+        t.save()
+        
+    return redirect(add_saldo)

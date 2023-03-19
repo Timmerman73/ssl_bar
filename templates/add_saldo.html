@@ -11,6 +11,37 @@
 <div class="container border m-4 p-4">
     
     <h1>Saldo Storten!</h1>
+    Via deze link kan je daadwerkelijk betalen. Vervolgens kun je hieronder je saldo toevoegen aan je account! <br>
+    <a href={{tikkie}}>{{tikkie}}</a>
+    <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#linkChange">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"/>
+      </svg>
+    </button>
+
+  <form action={% url 'tikkie_change' %} method="post">
+    {% csrf_token %}
+      <div class="modal fade" id="linkChange" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="save_changes">Tikkie link aanpassen</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input class="form-control" type="text" name="link" id="link">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                <button type="submit" class="btn btn-primary">Bevestig!</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+
+
     <form class="p-2" action={% url 'add_saldo' %} method="post">
         {% csrf_token %}
         {{form.amount.label_tag}} <br>
@@ -19,7 +50,7 @@
         {{form.user}} <br>
     
       <!-- Modal -->
-      <div class="modal fade" id="saveChanges" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">
+      <div class="modal fade" id="saldoChange" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -37,7 +68,7 @@
         </div>
       </div>
       </form>
-      <button type="button" class="btn btn-primary" onclick="saldo_parse()" data-bs-toggle="modal" data-bs-target="#saveChanges">
+      <button type="button" class="btn btn-primary" onclick="saldo_parse()" data-bs-toggle="modal" data-bs-target="#saldoChange">
         Saldo Toevoegen!
       </button>
 
@@ -49,6 +80,7 @@
           Logboek
         </a>
       </p>
+
       <div class="collapse" id="collapseExample">
         <div class="table-responsive">
           {{table | safe}}

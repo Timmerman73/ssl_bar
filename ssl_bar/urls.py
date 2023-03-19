@@ -25,6 +25,7 @@ urlpatterns = [
     path('login/',views.v_login,name="login"),
     path('logout/',views.v_logout,name="logout"),
     path('add_saldo/',views.add_saldo,name="add_saldo"),
+    path('tikkie_change/',views.tikkie_change,name="tikkie_change"),
     path('stats/',views.index,name="stats"),
     path('baradmin/',views.index,name="baradmin"),
 ]
