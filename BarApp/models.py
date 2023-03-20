@@ -9,6 +9,8 @@ class Saldo(models.Model):
     class Meta:
         db_table = 'Saldo'
         verbose_name_plural = "Saldo's"
+    def __str__(self) -> str:
+        return f"{self.user} | €{self.saldo}"
         
 class Stortingen(models.Model):
     storting_id = models.AutoField(primary_key=True)
@@ -22,14 +24,24 @@ class Stortingen(models.Model):
     class Meta:
         db_table = 'Stortingen'
         verbose_name_plural = "Stortingen"
+    def __str__(self) -> str:
+        
+        return f"{self.dateTime.strftime('%A %d-%B %X')} | {self.user} +€{self.amount} by {self.done_by}"
 
 class Drankjes(models.Model):
     drankjes_id = models.AutoField(primary_key=True)
     naam = models.CharField(max_length=128)
     prijs = models.DecimalField(max_digits=5,decimal_places=2)
+    img = models.ImageField(upload_to='images/')
+    dateTime = models.DateTimeField()
+    done_by =  models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="Added_by")
+    
     class Meta:
         db_table = 'Drankjes'
         verbose_name_plural = "Drankjes"
+    def __str__(self) -> str:
+        return f"{self.naam} | €{self.prijs}"
+    
     
 
 class Transacties(models.Model):
@@ -41,6 +53,8 @@ class Transacties(models.Model):
     class Meta:
         db_table = 'Transacties'
         verbose_name_plural = "Transacties"
+    def __str__(self):
+        return f"{self.transactie_id}|{self.dateTime}|{self.user}|{self.drankje}"
         
 class Tikkie(models.Model):
     id = models.AutoField(primary_key=True)
@@ -52,7 +66,7 @@ class Tikkie(models.Model):
         verbose_name_plural = "Tikkies"
         
     def __str__(self):
-        return self.link
+        return f"{self.link} by {self.user}"
     
     
     

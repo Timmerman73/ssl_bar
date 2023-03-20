@@ -104,7 +104,7 @@ def add_saldo(request):
                                     'user': request.user})
     
     if Tikkie.objects.exists():
-        tikkie = Tikkie.objects.latest("link")
+        tikkie = Tikkie.objects.latest("id")
     else:
         tikkie = "Nog geen link in database Voeg er een toe!"
     
@@ -116,10 +116,18 @@ def add_saldo(request):
     
     
 def tikkie_change(request):
-    print("CALL")
     if request.method == "POST":
         link = request.POST.get("link")
         t = Tikkie(link=link,user=request.user)
         t.save()
         
     return redirect(add_saldo)
+
+def bar_admin(request):
+    return render(request,"bar_admin.html",{'form':Add_drink()})
+
+class Add_drink(forms.ModelForm):
+    class Meta:
+        model = Drankjes
+        exclude = ["dateTime",""]
+

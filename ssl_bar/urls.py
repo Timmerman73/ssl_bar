@@ -17,7 +17,6 @@ from django.contrib import admin
 from django.urls import path
 from BarApp import views
 
-
 urlpatterns = [
     path('',views.index,name="home"),
     path('admin/', admin.site.urls,name="admin"),
@@ -26,6 +25,6 @@ urlpatterns = [
     path('logout/',views.v_logout,name="logout"),
     path('add_saldo/',views.add_saldo,name="add_saldo"),
     path('tikkie_change/',views.tikkie_change,name="tikkie_change"),
+    path('baradmin/',views.bar_admin,name="baradmin"),
     path('stats/',views.index,name="stats"),
-    path('baradmin/',views.index,name="baradmin"),
 ]
