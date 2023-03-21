@@ -1,11 +1,10 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.forms import UserCreationForm 
 from django.contrib import messages 
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
-from BarApp.models import Saldo,Stortingen,Drankjes,Transacties,Tikkie
-from django import forms
 from django.contrib.auth.decorators import login_required
+from BarApp.models import Saldo,Stortingen,Drankjes,Transacties,Tikkie
+from BarApp.forms import Add_drink,AddMoney
 from datetime import datetime
 import pandas as pd
 import locale
@@ -58,11 +57,7 @@ def v_logout(request):
     return redirect(index)
 
 
-class AddMoney(forms.Form):
-    amount = forms.DecimalField(label="Hoeveel geld wil je storten:",max_digits=5, decimal_places=2)
-    user = forms.ModelChoiceField(label="Bij wie moet dit op de rekening:",queryset=User.objects.filter(id__in=Saldo.objects.values_list('user_id',flat=True)))
 
-    
     
 @login_required
 def add_saldo(request):
@@ -123,11 +118,25 @@ def tikkie_change(request):
         
     return redirect(add_saldo)
 
-def bar_admin(request):
-    return render(request,"bar_admin.html",{'form':Add_drink()})
+from .forms import Add_drink
 
-class Add_drink(forms.ModelForm):
-    class Meta:
-        model = Drankjes
-        exclude = ["dateTime",""]
+@login_required
+def bar_admin(request):
+    if request.method == "POST":        
+        form = Add_drink(request.POST,request.FILES)
+        
+        if form.is_valid():  
+            final = form.save(commit=False) 
+            final.dateTime = datetime.now().replace(microsecond=0)
+            final.done_by = request.user
+            final.save()
+        # drankje = Drankjes(
+        #     naam=naam,
+        #     prijs=prijs,
+        #     img=img,
+        #     dateTime=datetime.now().replace(microsecond=0),
+        #     done_by=request.user
+        # )
+        # drankje.save()
+    return render(request,"bar_admin.html",{'form':Add_drink()})
 
