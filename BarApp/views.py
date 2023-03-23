@@ -3,8 +3,9 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from BarApp.models import Saldo,Stortingen,Drankjes,Transacties,Tikkie
-from BarApp.forms import Add_drink,AddMoney,Delete_drink,OrderDrink
+from BarApp.models import *
+from BarApp.forms import *
+from django.templatetags.static import static
 from datetime import datetime
 import pandas as pd
 import locale
@@ -17,6 +18,31 @@ from image_cropping.utils import get_backend
 
 @login_required
 def index(request):
+    if request.method == "POST":
+        user_id_list = request.POST.getlist("user")
+        selectedUsers = User.objects.filter(id__in=user_id_list)
+        print(selectedUsers)
+        drinkId = request.POST.get("drinkId")
+        drinkObj = Drankjes.objects.filter(drankjes_id=drinkId)
+        if len(drinkObj) > 0:
+            drinkObj = drinkObj[0]
+            for user in selectedUsers:
+                userSaldo = Saldo.objects.get(user=user)
+                saldoVoor = userSaldo.saldo
+                userSaldo.saldo -= drinkObj.prijs
+                saldoNa = userSaldo.saldo
+                transactie = Transacties(
+                    user=user,
+                    drankje=drinkObj,
+                    dateTime = datetime.now().replace(microsecond=0),
+                    saldo_voor = saldoVoor,
+                    saldo_na = saldoNa,
+                    done_by= request.user
+                )
+                transactie.save()
+                userSaldo.save()
+            messages.success(request,f"{request.user} je hebt {drinkObj.naam} besteld voor: {', '.join([str(i) for i in selectedUsers])}")
+        
     active_drinks = Drankjes.objects.filter(active=1)
     drinks = []
     for drink in active_drinks:
@@ -27,7 +53,7 @@ def index(request):
             "desc": drink.description,
         }
         if not drink.img:
-            drinks_dict["img"] = 'static/img/basic_bottle.svg'
+            drinks_dict["img"] = static('img/basic_bottle.svg')
         else:
             drinks_dict["img"] = get_backend().get_thumbnail_url(
         drink.img,
@@ -38,11 +64,8 @@ def index(request):
             'detail': True,
         }
             )           
-        drinks.append(drinks_dict)
-        
-        
-    order_form = OrderDrink()
-    print(vars(order_form))
+        drinks.append(drinks_dict) 
+    order_form = OrderDrink(initial={'user' : [request.user.id]})
     return render(request,"index.html", {
     "drinks": drinks,
     "form": order_form
@@ -144,7 +167,7 @@ def add_saldo(request):
         "table": html_table
                                             })
     
-    
+@login_required    
 def tikkie_change(request):
     if request.method == "POST":
         link = request.POST.get("link")
@@ -157,7 +180,7 @@ def tikkie_change(request):
 @login_required
 def bar_admin_add(request):
     if request.method == "POST":        
-        form = Add_drink(request.POST,request.FILES)
+        form = AddDrink(request.POST,request.FILES)
         
         if form.is_valid():  
             final = form.save(commit=False) 
@@ -165,11 +188,35 @@ def bar_admin_add(request):
             final.done_by = request.user
             final.save()
             messages.success(request,f"{request.POST['naam']} is toegevoegd voor €{request.POST['prijs']}")
-    return render(request,"baradmin_add.html",{'form':Add_drink()})
+    return render(request,"baradmin_add.html",{'form':AddDrink()})
 
 @login_required
-def bar_admin_change(request):
-    return redirect(bar_admin_add)
+def bar_admin_update(request):
+    if request.method == "POST":
+        drinkModel = Drankjes.objects.filter(drankjes_id=request.POST.get("drinkId"))
+        if drinkModel:
+            form = AddDrink(request.POST,request.FILES,instance=drinkModel[0])
+            if form.is_valid():  
+                final = form.save(commit=False) 
+                final.dateTime = datetime.now().replace(microsecond=0)
+                final.done_by = request.user
+                final.active = request.POST.get('active') == 'on'
+                final.save()
+                messages.success(request,f"{request.POST['naam']} is succesvol aangepast!")
+        
+    drinkForm = UpdateDrink()
+    updateDrinkForm = None
+    drink_id = request.GET.get("drink")
+    if drink_id:
+        drinkModel = Drankjes.objects.filter(drankjes_id=drink_id)
+        if drinkModel:
+            updateDrinkForm = UpdateDrinkModel(instance=drinkModel[0])
+    return render(request,"baradmin_update.html",{
+        "drinkId": drink_id,
+        "drinkForm": drinkForm,
+        "updateDrinkForm": updateDrinkForm
+        
+    })
 
 
 @login_required
@@ -181,5 +228,5 @@ def bar_admin_delete(request):
         drankje.delete()
         
         
-    return render(request,"baradmin_delete.html",{'form': Delete_drink()})
+    return render(request,"baradmin_delete.html",{'form': DeleteDrink()})
 

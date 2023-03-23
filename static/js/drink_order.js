@@ -7,9 +7,12 @@ window.onload = function() {
 }
   
 
-function drink_parse(btn,id,naam) {
-    savebtn = document.getElementById("savebtn")
-    orderDesc = document.getElementById("orderDesc")
-    console.log(btn,id,naam)
+function drink_parse(btn,id,drink_name,drink_price) {
+    let drinkInput = document.getElementById("drinkIdInput")
+    let orderDesc = document.getElementById("orderDesc")
+    console.log(drinkInput)
+    drinkInput.value = id 
+    orderDesc.innerHTML = `Je gaat <b>${drink_name}</b> bestellen voor €${drink_price}`
+    console.log(btn,id,drink_name)
 }
 

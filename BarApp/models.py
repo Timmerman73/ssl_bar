@@ -59,7 +59,9 @@ class Transacties(models.Model):
     user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
     drankje = models.ForeignKey('Drankjes',on_delete=models.CASCADE)
     dateTime = models.DateTimeField()
-    
+    done_by = models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="Bought_by")
+    saldo_voor = models.DecimalField(max_digits=5,decimal_places=2)
+    saldo_na = models.DecimalField(max_digits=5,decimal_places=2)
     class Meta:
         db_table = 'Transacties'
         verbose_name_plural = "Transacties"

@@ -10,7 +10,7 @@
 
 <div class="container border m-4">
     <h1>Drankjes verwijderen</h1>
-    <form class="p-2" action={% url 'baradmin_delete' %} method="post">
+    <form class="p-2" action={% url 'barDelete' %} method="post">
     
         {% csrf_token %}
         {{form.drink.label_tag }} <br>

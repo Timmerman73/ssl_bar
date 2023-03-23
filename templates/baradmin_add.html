@@ -10,7 +10,7 @@
 {% block content %}
 <div class="container border m-4">
     <h1>Drankje Toevoegen</h1>
-    <form class="p-4" action={% url 'baradmin_add' %} method="post" enctype="multipart/form-data">
+    <form class="p-4" action={% url 'barAdd' %} method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <table>
             {{form.naam.label_tag}}

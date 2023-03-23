@@ -11,18 +11,13 @@ class AddMoney(forms.Form):
     amount = forms.DecimalField(label="Hoeveel geld wil je storten:",max_digits=5, decimal_places=2)
     user = forms.ModelChoiceField(label="Bij wie moet dit op de rekening:",queryset=User.objects.filter(id__in=Saldo.objects.values_list('user_id',flat=True)).order_by("username"))
         
-class Delete_drink(forms.Form):
-    drink = forms.ModelChoiceField(label="Welk drankje wil je verwijderen",queryset=Drankjes.objects.all())
-    
 class OrderDrink(forms.Form):
     user = forms.MultipleChoiceField(
-        choices = get_users, # this is optional
+        choices = get_users,
         widget  = forms.CheckboxSelectMultiple,
     )
-
     
-
-class Add_drink(forms.ModelForm):
+class AddDrink(forms.ModelForm):
     class Meta:
         model = Drankjes
         fields = ["naam","prijs","description","img","ratio"]
@@ -33,3 +28,24 @@ class Add_drink(forms.ModelForm):
         widgets = {
             'description': forms.Textarea,
         }
+        
+class UpdateDrink(forms.Form):
+     drink = forms.ModelChoiceField(label="Welk drankje wil je aanpassen?",queryset=Drankjes.objects.all())
+class UpdateDrinkModel(forms.ModelForm):
+    class Meta:
+        model = Drankjes
+        fields = ["naam","prijs","description","active","img","ratio"]
+        labels = {
+        "img": "Afbeelding (Optioneel)",
+        "description": "Omschrijving (Optioneel)",
+        "active": "Is het drankje te koop?"
+        }
+        widgets = {
+            'description': forms.Textarea,
+        }
+class DeleteDrink(forms.Form):
+    drink = forms.ModelChoiceField(label="Welk drankje wil je verwijderen",queryset=Drankjes.objects.all())
+    
+
+    
+

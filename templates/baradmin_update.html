@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block head %}
+{% load static %}
+<script src="{% static 'js/update_drink.js' %}"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="container border m-4 p-4">
+    <h1>Welk drankje wil je aanpassen?</h1>
+    <form action={% url 'barUpdate' %} method="get">
+        {{drinkForm.drink.label}}
+        {{drinkForm.drink | add_class:"form-control mt-3"}}
+        <button type="submit" class="btn btn-primary mt-3">Informatie ophalen</button>
+
+    </form>
+
+    {% if updateDrinkForm %}
+    <h1>Aanpassen Drankje</h1>
+    <form action={% url 'barUpdate' %} method="post">
+            {% csrf_token %}
+            <input type="hidden" name="drinkId" value={{drinkId}}>
+            {{updateDrinkForm.naam.label_tag}}
+            {{updateDrinkForm.naam | add_class:"form-control"}}
+            {{updateDrinkForm.description.label_tag}}
+            {{updateDrinkForm.description | add_class:"form-control"}}
+            {{updateDrinkForm.prijs.label_tag}}
+            {{updateDrinkForm.prijs | add_class:"form-control"}}
+            {{updateDrinkForm.active.label_tag}}
+            {{updateDrinkForm.active | add_class:"form-check-input"}} <br> <br>
+            {{updateDrinkForm.img.label_tag }}
+            {{updateDrinkForm.img | add_class:"form-control"}}
+
+            <button type="submit" class="btn btn-primary mt-3">Wijzigingen opslaan</button>
+        </form>
+    {% endif %}
+
+</div>
+
+{% endblock content %}

@@ -4,6 +4,7 @@
 {% block head %}
 {% load static %}
 <script src="{% static 'js/drink_order.js' %}"></script>
+{{ form.media }}
 {% endblock head %}
 {% block content %}
 
@@ -17,15 +18,16 @@
         <div class="card-body">
         <h5 class="card-title">{{drink.naam}}</h5>
         <p class="card-text">Prijs: €{{drink.prijs}} <br>{{drink.desc}}</p>
-        <button type="button" onclick="drink_parse(this,{{drink.id}},'{{drink.naam}}')" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal"> Bestel</a>
+        <button type="button" onclick="drink_parse(this,{{drink.id}},'{{drink.naam}}','{{drink.prijs}}')" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal"> Bestel</a>
         </div>
     </div> 
    {% endfor %}
     <!-- Button trigger modal -->
   
   <!-- Modal -->
-  <form action="{% url 'home' %}" method="post">
+  <form action="{% url 'home' %}" method="post" id="drinkOrder">
     {% csrf_token %}
+    <input type="hidden" id="drinkIdInput" name="drinkId" value="NONE">
     <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="OrderLabel" aria-hidden="true">
         <div class="modal-dialog">
         <div class="modal-content">
@@ -34,12 +36,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <p id="orderDesc"></p>
+            Beste <b>{{user}}</b>, <div id="orderDesc"></div>
+            <p>Bestel je ook voor anderen? Selecteer dan hun naam uit de lijst!</p>
             {{form.user | add_class:'form-check'}}
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" id="savebtn"  class="btn btn-primary">Save changes</button>
+            <button type="submit" id="savebtn" class="btn btn-primary">Bestel!</button>
             </div>
         </div>
         </div>
@@ -50,4 +53,5 @@
 </div>
     
 </div>
+
 {% endblock content %}
