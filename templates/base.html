@@ -39,7 +39,17 @@
                     <a class="nav-link text-white" href={% url 'add_saldo' %}>Saldo Toevoegen</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link text-white" href={% url 'baradmin' %}>Bar administratie</a>
+                    <div class="dropdown">
+                      <a class="btn dropdown-toggle text-white" href="#" role="button" id="bar_admin_dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        Bar Administratie
+                      </a>
+                    
+                      <ul class="dropdown-menu-ssl-red dropdown-menu " id="badm" aria-labelledby="bar_admin_dropdownMenuLink">
+                        <li><a class="dropdown-item text-white" href={% url 'baradmin_add' %}>Drankjes Toevoegen</a></li>
+                        <li><a class="dropdown-item text-white" href={% url 'baradmin_change' %}>Drankjes Aanpassen</a></li>
+                        <li><a class="dropdown-item text-white" href={% url 'baradmin_delete' %}>Drankjes Verwijderen</a></li>
+                      </ul>
+                    </div>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link text-white" href={% url 'stats' %}>Statestieken</a>

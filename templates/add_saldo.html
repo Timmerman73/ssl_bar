@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block head %}
 {% load static %}
@@ -44,11 +45,12 @@
 
 
     <form class="p-2" action={% url 'add_saldo' %} method="post">
+      
         {% csrf_token %}
-        {{form.amount.label_tag}} <br>
-        {{form.amount}} <br>
+        {{form.amount.label_tag }} <br>
+        {{form.amount | add_class:"form-control" }} <br>
         {{form.user.label_tag}} <br>
-        {{form.user}} <br>
+        {{form.user | add_class:"form-control" }} <br>
     
       <!-- Modal -->
       <div class="modal fade" id="saldoChange" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">

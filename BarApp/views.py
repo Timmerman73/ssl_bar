@@ -4,17 +4,49 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from BarApp.models import Saldo,Stortingen,Drankjes,Transacties,Tikkie
-from BarApp.forms import Add_drink,AddMoney
+from BarApp.forms import Add_drink,AddMoney,Delete_drink,OrderDrink
 from datetime import datetime
 import pandas as pd
 import locale
+from operator import itemgetter
 locale.setlocale(locale.LC_ALL,"nl-nl")
 
 # Create your views here.
+from image_cropping.utils import get_backend
+
 
 @login_required
 def index(request):
-    return render(request,"index.html")
+    active_drinks = Drankjes.objects.filter(active=1)
+    drinks = []
+    for drink in active_drinks:
+        drinks_dict = {
+            "id": drink.drankjes_id,
+            "naam": drink.naam,
+            "prijs": drink.prijs,
+            "desc": drink.description,
+        }
+        if not drink.img:
+            drinks_dict["img"] = 'static/img/basic_bottle.svg'
+        else:
+            drinks_dict["img"] = get_backend().get_thumbnail_url(
+        drink.img,
+        {
+            'size': (286, 180),
+            'box': drink.ratio,
+            'crop': True,
+            'detail': True,
+        }
+            )           
+        drinks.append(drinks_dict)
+        
+        
+    order_form = OrderDrink()
+    print(vars(order_form))
+    return render(request,"index.html", {
+    "drinks": drinks,
+    "form": order_form
+    })
 
 
 def register(request):
@@ -80,20 +112,23 @@ def add_saldo(request):
             saldo.saldo = new_saldo
             saldo.save()
             storting.save()
-    df = pd.DataFrame(list(Stortingen.objects.all().values("dateTime","user_id","saldo_voor","amount","saldo_na","done_by_id")))
-    df = df.sort_values(by="dateTime",ascending=False)
-    df["user_id"] = [User.objects.get(id=i) for i in df["user_id"]]
-    df["done_by_id"] = [User.objects.get(id=i) for i in df["done_by_id"]]
-    df['dateTime'] = [i.strftime("%A %d-%B %X") for i in df["dateTime"]]
-    df = df.rename(columns={
-        "dateTime":"Datum & Tijd",
-        "user_id":"Saldo van",
-        "saldo_voor":"Saldo voor",
-        "amount":"Bedrag",
-        "saldo_na":"Saldo na",
-        "done_by_id":"Uitgevoerd door"
-               })
-    html_table = df.to_html(classes="table table-striped table-bordered",index=False,max_rows=25)
+    if Stortingen.objects.exists():
+        df = pd.DataFrame(list(Stortingen.objects.all().values("dateTime","user_id","saldo_voor","amount","saldo_na","done_by_id")))
+        df = df.sort_values(by="dateTime",ascending=False)
+        df["user_id"] = [User.objects.get(id=i) for i in df["user_id"]]
+        df["done_by_id"] = [User.objects.get(id=i) for i in df["done_by_id"]]
+        df['dateTime'] = [i.strftime("%A %d-%B %X") for i in df["dateTime"]]
+        df = df.rename(columns={
+            "dateTime":"Datum & Tijd",
+            "user_id":"Saldo van",
+            "saldo_voor":"Saldo voor",
+            "amount":"Bedrag",
+            "saldo_na":"Saldo na",
+            "done_by_id":"Uitgevoerd door"
+                })
+        html_table = df.to_html(classes="table table-striped table-bordered",index=False,max_rows=25)
+    else:
+        html_table = "Het logboek is nog leeg"
     
     money_form = AddMoney(initial= {'amount': 0.00,
                                     'user': request.user})
@@ -118,10 +153,9 @@ def tikkie_change(request):
         
     return redirect(add_saldo)
 
-from .forms import Add_drink
 
 @login_required
-def bar_admin(request):
+def bar_admin_add(request):
     if request.method == "POST":        
         form = Add_drink(request.POST,request.FILES)
         
@@ -130,13 +164,22 @@ def bar_admin(request):
             final.dateTime = datetime.now().replace(microsecond=0)
             final.done_by = request.user
             final.save()
-        # drankje = Drankjes(
-        #     naam=naam,
-        #     prijs=prijs,
-        #     img=img,
-        #     dateTime=datetime.now().replace(microsecond=0),
-        #     done_by=request.user
-        # )
-        # drankje.save()
-    return render(request,"bar_admin.html",{'form':Add_drink()})
+            messages.success(request,f"{request.POST['naam']} is toegevoegd voor €{request.POST['prijs']}")
+    return render(request,"baradmin_add.html",{'form':Add_drink()})
+
+@login_required
+def bar_admin_change(request):
+    return redirect(bar_admin_add)
+
+
+@login_required
+def bar_admin_delete(request):
+    if request.method == "POST":
+        drink = request.POST.get("drink")
+        drankje = Drankjes.objects.get(drankjes_id=drink)
+        messages.success(request,f"{drankje} Sucessvol verwijderd!")
+        drankje.delete()
+        
+        
+    return render(request,"baradmin_delete.html",{'form': Delete_drink()})
 

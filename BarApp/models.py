@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 import os
+from image_cropping import ImageRatioField,ImageCropField
 
 def img_filename(instance, filename):
     ext = filename.split('.')[-1]
-    filename = "%s_.%s" % (instance.naam, ext)
+    filename = "%s.%s" % (instance.naam, ext)
     return os.path.join('drinks', filename)
 
 # Create your models here.
@@ -38,7 +39,9 @@ class Drankjes(models.Model):
     drankjes_id = models.AutoField(primary_key=True)
     naam = models.CharField(max_length=128)
     prijs = models.DecimalField(max_digits=5,decimal_places=2)
-    img = models.ImageField(upload_to=img_filename)
+    description = models.CharField(max_length=512,blank=True)
+    img = ImageCropField(upload_to=img_filename,blank=True,null=True)
+    ratio = ImageRatioField('img','286x180')
     dateTime = models.DateTimeField()
     done_by =  models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="Added_by")
     active = models.BooleanField(default=True)

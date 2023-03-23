@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block head %}
+{% load static %}
+<script src="{% static 'js/delete_drink.js' %}"></script>
+{% endblock head %}
+
+{% block content %}
+
+
+<div class="container border m-4">
+    <h1>Drankjes verwijderen</h1>
+    <form class="p-2" action={% url 'baradmin_delete' %} method="post">
+    
+        {% csrf_token %}
+        {{form.drink.label_tag }} <br>
+        {{form.drink | add_class:"form-control mt-2" }} <br>
+    
+      <!-- Modal -->
+      <div class="modal fade" id="deleteDrink" tabindex="-1" aria-labelledby="save_changes" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="save_changes">Saldo Bijladen</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <b id="usrname">Beste {{user}},</b> <p id="conftext"> Dit hoor je niet te zien! </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+              <button type="submit" class="btn btn-primary">Verwijderen!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+      <button type="button" class="btn btn-primary mb-4" onclick="drink_parse()" data-bs-toggle="modal" data-bs-target="#deleteDrink">
+        Drankje verwijderen
+      </button>
+</div>
+
+{% endblock content %}

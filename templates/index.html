@@ -1,9 +1,53 @@
 <!DOCTYPE html>
 {% extends 'base.html' %}
-
-
+{% load widget_tweaks %}
+{% block head %}
+{% load static %}
+<script src="{% static 'js/drink_order.js' %}"></script>
+{% endblock head %}
 {% block content %}
 
 
-Welkom op de homepage
+<div class="container border m-4 p-4">
+    <h1>Wat wil je bestellen?</h1>
+    <div class="card-columns">
+   {% for drink in drinks  %}
+    <div class="card m-2 d-inline-block" style="width: 18rem;">
+        <div class="drinkDiv"><img src={{drink.img}} class="card-img-top" alt={{drink.desc}}></div>
+        <div class="card-body">
+        <h5 class="card-title">{{drink.naam}}</h5>
+        <p class="card-text">Prijs: €{{drink.prijs}} <br>{{drink.desc}}</p>
+        <button type="button" onclick="drink_parse(this,{{drink.id}},'{{drink.naam}}')" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal"> Bestel</a>
+        </div>
+    </div> 
+   {% endfor %}
+    <!-- Button trigger modal -->
+  
+  <!-- Modal -->
+  <form action="{% url 'home' %}" method="post">
+    {% csrf_token %}
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="OrderLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5" id="OrderLabel">Drankjes bestellen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <p id="orderDesc"></p>
+            {{form.user | add_class:'form-check'}}
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" id="savebtn"  class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</form>
+
+
+</div>
+    
+</div>
 {% endblock content %}

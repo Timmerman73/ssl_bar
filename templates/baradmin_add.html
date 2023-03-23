@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block head %}
+{{ form.media }}
+{% endblock head %}
+
+{% block content %}
+<div class="container border m-4">
+    <h1>Drankje Toevoegen</h1>
+    <form class="p-4" action={% url 'baradmin_add' %} method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table>
+            {{form.naam.label_tag}}
+            {{form.naam | add_class:"form-control"}}
+            {{form.description.label_tag}}
+            {{form.description | add_class:"form-control"}}
+            {{form.prijs.label_tag}}
+            {{form.prijs | add_class:"form-control"}}
+            {{form.img.label_tag }}
+            {{form.img | add_class:"form-control"}}
+        </table>
+        <br>
+        <button class="btn btn-primary" type="submit">Drankje toevoegen</button>
+    </form>
+
+
+</div>
+{% endblock content %}

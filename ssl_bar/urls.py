@@ -28,7 +28,9 @@ urlpatterns = [
     path('logout/',views.v_logout,name="logout"),
     path('add_saldo/',views.add_saldo,name="add_saldo"),
     path('tikkie_change/',views.tikkie_change,name="tikkie_change"),
-    path('baradmin/',views.bar_admin,name="baradmin"),
+    path('baradmin_add/',views.bar_admin_add,name="baradmin_add"),
+    path('baradmin_change/',views.bar_admin_change,name="baradmin_change"),
+    path('baradmin_delete/',views.bar_admin_delete,name="baradmin_delete"),
     path('stats/',views.index,name="stats"),
 ]
 
