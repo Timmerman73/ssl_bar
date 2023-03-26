@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+
+{% block head %}
+
+
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.0.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.0.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.0.3.min.js"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-3.0.3.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+    <div class="container border m-4">
+        <h1>Saldo Logboek</h1>
+        <form action={% url 'logSaldo' %} method="get">
+            {{form.usr.label_tag}}
+            {{form.usr | add_class:'form-control'}}
+
+            <button type="submit" class="btn btn-primary mt-2">Saldo's ophalen</button>
+        </form>
+
+        {{table | safe}}
+
+        <h1>{{plotTitle}}</h1>
+
+        {{div | safe}}
+        {{script | safe}}
+    </div>
+
+{% endblock content %}

@@ -6,14 +6,35 @@ from django.contrib.auth.decorators import login_required
 from BarApp.models import *
 from BarApp.forms import *
 from django.templatetags.static import static
-from datetime import datetime
+from datetime import datetime,timedelta
 import pandas as pd
-import locale
 from operator import itemgetter
-locale.setlocale(locale.LC_ALL,"nl-nl")
+from image_cropping.utils import get_backend
+from django.db.models import Q
+from bokeh.plotting import figure
+from bokeh.models import DatetimeTickFormatter
+from bokeh.embed import components
+from bokeh.models import HoverTool
+
+
+pd.set_option("colheader_justify", "left")
+
+
+def get_storting_table(objects,maxRows=25):
+    if Stortingen.objects.exists():
+        df = pd.DataFrame(list(objects.values("date","time","user_id","saldo_voor","amount","saldo_na","done_by_id")))
+        df.sort_values(by=["date","time"],ascending=False,inplace=True)
+        df["user_id"] = [User.objects.get(id=i) for i in df["user_id"]]
+        df["done_by_id"] = [User.objects.get(id=i) for i in df["done_by_id"]]
+        df['date'] = [i.strftime("%A %d-%B") for i in df["date"]]
+        df['time'] = [i.strftime("%X") for i in df["time"]]
+        df.columns = ["Datum","Tijd","Saldo van","Saldo voor","Bedrag","Saldo Na","Uitgevoerd door"]
+        html_table = df.to_html(classes="table table-striped table-bordered",index=False,max_rows=maxRows)
+    else:
+        html_table = "Het logboek is nog leeg"
+    return html_table
 
 # Create your views here.
-from image_cropping.utils import get_backend
 
 
 @login_required
@@ -21,7 +42,6 @@ def index(request):
     if request.method == "POST":
         user_id_list = request.POST.getlist("user")
         selectedUsers = User.objects.filter(id__in=user_id_list)
-        print(selectedUsers)
         drinkId = request.POST.get("drinkId")
         drinkObj = Drankjes.objects.filter(drankjes_id=drinkId)
         if len(drinkObj) > 0:
@@ -34,8 +54,10 @@ def index(request):
                 transactie = Transacties(
                     user=user,
                     drankje=drinkObj,
-                    dateTime = datetime.now().replace(microsecond=0),
+                    date = datetime.now().date(),
+                    time = datetime.now().time().replace(microsecond=0),
                     saldo_voor = saldoVoor,
+                    amount = -drinkObj.prijs,
                     saldo_na = saldoNa,
                     done_by= request.user
                 )
@@ -65,6 +87,7 @@ def index(request):
         }
             )           
         drinks.append(drinks_dict) 
+    drinks = sorted(drinks,key=itemgetter("naam"))
     order_form = OrderDrink(initial={'user' : [request.user.id]})
     return render(request,"index.html", {
     "drinks": drinks,
@@ -130,28 +153,13 @@ def add_saldo(request):
                 amount=amount,
                 saldo_voor=old_saldo,
                 saldo_na=new_saldo,
-                dateTime=datetime.now().replace(microsecond=0))
+                date=datetime.now().date(),
+                time= datetime.now().replace(microsecond=0).time())
             
             saldo.saldo = new_saldo
             saldo.save()
             storting.save()
-    if Stortingen.objects.exists():
-        df = pd.DataFrame(list(Stortingen.objects.all().values("dateTime","user_id","saldo_voor","amount","saldo_na","done_by_id")))
-        df = df.sort_values(by="dateTime",ascending=False)
-        df["user_id"] = [User.objects.get(id=i) for i in df["user_id"]]
-        df["done_by_id"] = [User.objects.get(id=i) for i in df["done_by_id"]]
-        df['dateTime'] = [i.strftime("%A %d-%B %X") for i in df["dateTime"]]
-        df = df.rename(columns={
-            "dateTime":"Datum & Tijd",
-            "user_id":"Saldo van",
-            "saldo_voor":"Saldo voor",
-            "amount":"Bedrag",
-            "saldo_na":"Saldo na",
-            "done_by_id":"Uitgevoerd door"
-                })
-        html_table = df.to_html(classes="table table-striped table-bordered",index=False,max_rows=25)
-    else:
-        html_table = "Het logboek is nog leeg"
+    html_table = get_storting_table(Stortingen.objects.all())
     
     money_form = AddMoney(initial= {'amount': 0.00,
                                     'user': request.user})
@@ -184,7 +192,8 @@ def bar_admin_add(request):
         
         if form.is_valid():  
             final = form.save(commit=False) 
-            final.dateTime = datetime.now().replace(microsecond=0)
+            final.date = datetime.now().date()
+            final.time = datetime.now().replace(microsecond=0).time()
             final.done_by = request.user
             final.save()
             messages.success(request,f"{request.POST['naam']} is toegevoegd voor €{request.POST['prijs']}")
@@ -198,15 +207,16 @@ def bar_admin_update(request):
             form = AddDrink(request.POST,request.FILES,instance=drinkModel[0])
             if form.is_valid():  
                 final = form.save(commit=False) 
-                final.dateTime = datetime.now().replace(microsecond=0)
+                final.date = datetime.now().date()
+                final.time = datetime.now().replace(microsecond=0).time()
                 final.done_by = request.user
                 final.active = request.POST.get('active') == 'on'
                 final.save()
                 messages.success(request,f"{request.POST['naam']} is succesvol aangepast!")
         
-    drinkForm = UpdateDrink()
     updateDrinkForm = None
     drink_id = request.GET.get("drink")
+    drinkForm = UpdateDrink(initial={"drink":drink_id})
     if drink_id:
         drinkModel = Drankjes.objects.filter(drankjes_id=drink_id)
         if drinkModel:
@@ -230,3 +240,208 @@ def bar_admin_delete(request):
         
     return render(request,"baradmin_delete.html",{'form': DeleteDrink()})
 
+def log_storting(request):
+    getTuple = request.GET.get("usr"),request.GET.get("exe"),request.GET.get("dT")
+    if any(getTuple):
+        usr,exe,dT = getTuple
+        query = Q()
+        if usr:
+            query &= Q(user=usr)
+        if exe: 
+            query &= Q(done_by=exe)        
+        if dT:
+            dT=datetime.strptime(dT, '%Y-%m-%d').date()
+            query &= Q(date=dT)
+
+        selected = Stortingen.objects.filter(query)
+        html_table = get_storting_table(selected,100)
+        form = UserStortingLog(initial={'usr':usr,'exe':exe,"dT":request.GET.get("dT")})
+    else: 
+        html_table = get_storting_table(Stortingen.objects.all())
+        form = UserStortingLog()
+        
+        
+    
+    return render(request,"log_storting.html",{
+        "form": form,
+        "table": html_table
+        
+        
+    })
+
+def log_saldo(request):
+    usr = request.GET.get('usr')
+    if not usr:
+        usr = None
+    user = User.objects.filter(id=usr)
+    plotTitle,html_table,script,div = "Geen data beschikbaar",None,None,None
+    if len(user) == 0:
+        if Saldo.objects.exists():
+            df = pd.DataFrame(list(Saldo.objects.all().values("user","saldo")))
+            df = df.sort_values(by="user",ascending=True)
+            df["user"] = [User.objects.get(id=i).username for i in df["user"]]
+            df["saldo"] = [float(i) for i in df["saldo"]]
+            df.style.set_properties(**{'text-align': 'left'})
+            p = figure(x_range=df["user"],y_range=(df.saldo.min()-1,df.saldo.max()+5),toolbar_location=None)
+
+            df["colors"] = ["green" if i > 0 else "red" for i in df['saldo']]
+            
+            p.vbar(x="user",top="saldo",color="colors", source=df, width=0.9)
+            
+            ht = HoverTool(
+                tooltips = [
+                ("Gebruiker","@user"),
+                ("Saldo","€@saldo{0.00}"),
+                ],
+)           
+            p.line(x=(-1,len(df["user"])+5), y=0,color="black",width=5)
+            p.toolbar.active_drag = None
+            p.toolbar.active_scroll = None
+            p.toolbar.active_tap = None
+            p.add_tools(ht)
+            
+            plotTitle = "Plot van alle saldo's van alle gebruikers!"
+            script, div = components(p)
+            
+            df["saldo"] = [f"€{i}" for i in df["saldo"]]
+            df.columns = ["Gebruiker","Saldo","Kleur"]
+            html_table = df.to_html(classes="table table-striped table-bordered table-sm mt-3",index=False,columns=df.columns[0:2])
+    else:
+        user = user[0]
+        stortingen = pd.DataFrame(list(Stortingen.objects.filter(user=user).values("storting_id","date","time","saldo_voor","amount","saldo_na","done_by")))
+        transacties = pd.DataFrame(list(Transacties.objects.filter(user=user).values("transactie_id","date","time","saldo_voor","amount","saldo_na","drankje","done_by")))
+
+        
+        if not stortingen.empty or not transacties.empty:
+            stortingen["drankje"] = [float("NaN")]*len(stortingen)
+            stort_trans = pd.concat([stortingen,transacties])
+            drinks = []
+            for i in stort_trans["drankje"]:
+                if i.is_integer():
+                    drinks.append(Drankjes.objects.get(drankjes_id=i).naam)
+                else:
+                    drinks.append("NaN")
+            stort_trans["drankje"] = drinks        
+            stort_trans.sort_values(by=["date","time"],inplace=True)
+            
+            stort_trans["done_by"] = [User.objects.get(id=i).username for i in stort_trans["done_by"]]
+            stort_trans.saldo_voor = stort_trans.saldo_voor.astype(float)
+            stort_trans.amount = stort_trans.amount.astype(float)
+            stort_trans.saldo_na = stort_trans.saldo_na.astype(float)
+            
+            ids,st_type = [],[]
+            
+            if stortingen.empty:
+                stort_trans["storting_id"] = [float('NaN')]*len(stort_trans)
+            if transacties.empty:
+                stort_trans["transactie_id"] = [float('NaN')]*len(stort_trans)    
+            
+            for s,t in zip(stort_trans["storting_id"],stort_trans["transactie_id"]):
+                if isinstance(s,int) or s.is_integer():
+                    st_type.append("Storting")
+                    ids.append(int(s))
+                elif isinstance(t,int) or t.is_integer():
+                    st_type.append("Transactie")
+                    ids.append(int(t))
+            stort_trans.drop(columns=["storting_id","transactie_id"],inplace=True)
+            stort_trans.insert(0,"id",ids)
+            stort_trans.insert(1,"type",st_type)
+            
+            
+            stort_trans["dT"] = [datetime.combine(d,t) for d,t in zip(stort_trans["date"],stort_trans["time"])]
+
+            r1 = [0,"Storting",user.date_joined.replace(tzinfo=None,microsecond=0).date(),user.date_joined.replace(tzinfo=None,microsecond=0).time(),0.0,0.0,0.0,"admin","NaN",user.date_joined.replace(tzinfo=None,microsecond=0)]
+            d = {k:v for k,v in zip(stort_trans.columns,r1)}
+            stort_trans = pd.concat([pd.DataFrame(d,index=[0]),stort_trans],ignore_index=True)
+            
+                
+            tools = "pan,reset,xwheel_zoom"
+            dt_range = (stort_trans.dT.min()-timedelta(hours=6),stort_trans.dT.max()+timedelta(hours=6))
+            p = figure(x_range=dt_range,y_range=(stort_trans.saldo_na.min()-5,stort_trans.saldo_na.max()+5),tools=tools, active_scroll='xwheel_zoom')
+            colormap = {"Storting":"green","Transactie":"red"}
+
+            stort_trans["colors"] = [colormap[x] for x in stort_trans['type']]
+            p.line("dT","saldo_na",source=stort_trans,line_width=2,color="black")
+            p.circle("dT","saldo_na",source=stort_trans,size=10,color="colors")
+            
+            p.xaxis.formatter = DatetimeTickFormatter(minutes="%H:%M:%S",hours="%H:%M:%S",days="%d-%b %Hh",months="%d-%m-%Y",years="%d-%m-%Y")
+            
+            ht = HoverTool(
+                tooltips = [
+                ("Id","@id"),
+                ("Type","@type"),
+                ("Drankje","@drankje"),
+                ("Saldo voor","€@saldo_voor{00.00}"),
+                ("Bedrag","€@amount{00.00}"),
+                ("Saldo na","€@saldo_na{00.00}"),
+                ("Datum","@date{%d-%m-%Y}"),
+                ("Tijd","@time{%H:%M:%S}"),
+                ("Uitgevoerd door","@done_by"),
+                ],formatters={'@date': 'datetime','@time': 'datetime'})
+            
+            p.add_tools(ht)
+            
+            plotTitle = f"Saldoverloop van {user.username}"
+            script, div = components(p)
+            
+            
+            colnames = ["Id","Type","Datum","Tijd","Saldo Voor","Bedrag","Saldo Na","Uitgevoerd door","Drankje","DateTime","cols"]
+            stort_trans.columns = colnames
+            html_table = stort_trans.to_html(classes="table table-striped table-bordered table-sm mt-3",index=False,columns=colnames[0:9])
+    
+    form = UserSaldoLog(initial={"usr":usr})
+    return render(request,"log_saldo.html",{
+        "form": form,
+        "table": html_table,
+        "plotTitle": plotTitle,
+        "script": script,
+        "div": div,
+    })
+    
+
+def log_drink(request):
+    plotTitle,script,div = "Geen data beschikbaar",'',''
+    dT = request.GET.get("dT")
+    
+    if dT:
+        orders = Transacties.objects.filter(date=datetime.strptime(dT, '%Y-%m-%d').date())
+        plotTitle = f"Drankjes verkocht op {'-'.join(dT.split('-')[::-1])}"
+    else:
+        orders = Transacties.objects.all()
+        plotTitle = "Verkochte drankjes"
+    
+    if len(orders) > 0:
+        count_dict = {}
+        for i in orders:
+            if i.drankje is not None:
+                if i.drankje.naam not in count_dict:
+                    count_dict[i.drankje.naam] = 1
+                else:
+                    count_dict[i.drankje.naam] +=1
+
+        p = figure(x_range=list(count_dict.keys()),y_range=(0,max(count_dict.values())+1),toolbar_location=None)
+
+
+        p.vbar(x=list(count_dict.keys()),top=list(count_dict.values()), width=0.9)
+
+        ht = HoverTool(
+        tooltips = [
+        ("Drankje","@x"),
+        ("Aantal verkocht","@top"),
+        ],)           
+        p.toolbar.active_drag = None
+        p.toolbar.active_scroll = None
+        p.toolbar.active_tap = None
+        p.add_tools(ht)
+
+        script, div = components(p)
+
+    else:
+        plotTitle = f"Er zijn geen drankjes verkocht op {'-'.join(dT.split('-')[::-1])}"
+    form = DateDrinkLog(initial={"dT":dT})
+    return render(request,"log_drinks.html",{
+        "form": form,
+        "plotTitle": plotTitle,
+        "div": div,
+        "script": script,
+    })

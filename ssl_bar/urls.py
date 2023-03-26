@@ -31,7 +31,9 @@ urlpatterns = [
     path('baradmin_add/',views.bar_admin_add,name="barAdd"),
     path('baradmin_update/',views.bar_admin_update,name="barUpdate"),
     path('baradmin_delete/',views.bar_admin_delete,name="barDelete"),
-    path('stats/',views.index,name="stats"),
+    path('log_storting/',views.log_storting,name="logStorting"),
+    path('log_saldo',views.log_saldo,name="logSaldo"),
+    path('log_drink',views.log_drink,name="logDrink"),
 ]
 
 

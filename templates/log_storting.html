@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container border m-4">
+<h1>Filter stortingen</h1>
+<form action={% url 'logStorting' %} method="get">
+    {{form.usr.label_tag}}
+    {{form.usr | add_class:'form-control'}}
+    {{form.exe.label_tag}}
+    {{form.exe | add_class:'form-control'}}
+    {{form.dT.label_tag}}
+    {{form.dT | add_class:'form-control'}}
+
+    <button type="submit" class="btn btn-primary mt-3">Filter</button>
+</form>
+<h1>Storting Logboek</h1>
+    {{table | safe}}
+</div>
+{% endblock content %}

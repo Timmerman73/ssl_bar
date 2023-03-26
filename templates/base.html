@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/446b75a6ee.js" crossorigin="anonymous"></script>
     {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/bar.png' %}"/>
     <link rel="stylesheet" type="text/css" href={% static 'css/style.css' %}>
     <link rel="stylesheet" type="text/css" href={% static 'css/vendor/bootstrap/bootstrap.css' %}>
     <script src={% static 'js/vendor/bootstrap/bootstrap.js' %}></script>
@@ -52,7 +53,17 @@
                     </div>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link text-white" href={% url 'stats' %}>Statestieken</a>
+                    <div class="dropdown">
+                      <a class="btn dropdown-toggle text-white" href="#" role="button" id="logs_dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        Logboek
+                      </a>
+                    
+                      <ul class="dropdown-menu-ssl-red dropdown-menu " id="badm" aria-labelledby="logs_dropdownMenuLink">
+                        <li><a class="dropdown-item text-white" href={% url 'logStorting' %}>Stortingen Logboek</a></li>
+                        <li><a class="dropdown-item text-white" href={% url 'logSaldo' %}>Saldo Logboek</a></li>
+                        <li><a class="dropdown-item text-white" href={% url 'logDrink' %}>Drankjes Logboek</a></li>
+                      </ul>
+                    </div>
                   </li>
                 </ul>
 

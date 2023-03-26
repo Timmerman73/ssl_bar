@@ -46,6 +46,24 @@ class UpdateDrinkModel(forms.ModelForm):
 class DeleteDrink(forms.Form):
     drink = forms.ModelChoiceField(label="Welk drankje wil je verwijderen",queryset=Drankjes.objects.all())
     
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
+class UserStortingLog(forms.Form):
+    usr = forms.ModelChoiceField(label="Saldo van:",queryset=User.objects.filter(id__in=Saldo.objects.values_list('user_id',flat=True)).order_by("username"),required=False)
+    exe = forms.ModelChoiceField(label="Uitgevoerd door",queryset=User.objects.all(),required=False)
+    dT = forms.DateField(label="Datum",widget=DateInput,required=False)
+    
+class UserSaldoLog(forms.Form):
+    usr = forms.ModelChoiceField(label="Saldo van:",queryset=User.objects.filter(id__in=Saldo.objects.values_list('user_id',flat=True)).order_by("username"),required=False,empty_label="Alle gebruikers")
+
+class DateDrinkLog(forms.Form):
+    dT = forms.DateField(label="Datum (Leeg laten voor alles)",widget=DateInput,required=False)
+    
+    
+        
+    
 
     
 
