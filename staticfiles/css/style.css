@@ -1,0 +1,49 @@
+.ssl-red {
+  background-color: rgb(254, 0, 0);
+}
+
+.dropdown-menu-ssl-red {
+  color: #dee2e6;
+  background-color: #b30000;
+  border-color: rgb(129, 0, 0);
+  
+
+}
+
+#badm {
+  background-color: #b30000;
+  background-clip: padding-box;
+  border: 0px
+}
+
+
+.dropdown-menu-ssl-red .dropdown-item {
+  color: #dee2e6;
+  background-color: #b30000;
+}
+.dropdown-menu-ssl-red .dropdown-item:hover, .dropdown-menu-ssl-red .dropdown-item:focus {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+.dropdown-menu-ssl-red .dropdown-item.active, .dropdown-menu-ssl-red .dropdown-item:active {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+.dropdown-menu-ssl-red .dropdown-item.disabled, .dropdown-menu-ssl-red .dropdown-item:disabled {
+  color: #adb5bd;
+}
+.dropdown-menu-ssl-red .dropdown-divider {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.dropdown-menu-ssl-red .dropdown-item-text {
+  color: #dee2e6;
+}
+.dropdown-menu-ssl-red .dropdown-header {
+  color: #adb5bd;
+}
+
+
+.temp {
+  min-height: 350px !important;
+  
+}
